@@ -1,0 +1,27 @@
+# Compiled
+out/
+*.class
+
+# Distribution
+dist/
+
+# Persistence files
+*.dat
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.settings/
+.project
+.classpath
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Kilo
+.kilo/

@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Jogo da Velha
+Comment=Jogo da Velha - Tic Tac Toe em Java/Swing
+Exec=/mnt/SharedData/all-kode/all-kodez/ens-kody/Java/JogoDaVelha/JogoDaVelha.sh
+Icon=applications-games
+Terminal=false
+Type=Application
+Categories=Game;BoardGame;
+StartupNotify=true
