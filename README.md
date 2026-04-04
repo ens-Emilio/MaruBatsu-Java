@@ -1,18 +1,20 @@
 # Jogo da Velha / Tic-Tac-Toe / Ta-Te-Ti
 
-Tic-Tac-Toe em Java com Swing GUI, MVC, IA (alpha-beta), temas, save/load, undo/redo e placar persistente.
+**[Portugues](#portugues-br)** &nbsp;|&nbsp; **[English](#english)** &nbsp;|&nbsp; **[Espanol](#espanol)**
 
 ---
 
-<details>
-<summary>🌐 Português (BR)</summary>
+<a id="portugues-br"></a>
+## 🇧🇷 Portugues (BR)
 
-## Requisitos
+Jogo da Velha (Tic-Tac-Toe) implementado em Java com interface grafica Swing, arquitetura MVC, IA com alpha-beta pruning, sistema de temas, save/load, undo/redo e placar persistente.
+
+### Requisitos
 
 - **Java 21+** (compilado com OpenJDK 25)
 - **JUnit 4** (para rodar os testes)
 
-## Estrutura do Projeto
+### Estrutura do Projeto
 
 ```
 JogoDaVelha/
@@ -21,7 +23,6 @@ JogoDaVelha/
 ├── src/
 │   ├── main/java/
 │   │   ├── Main.java                    # Ponto de entrada
-│   │   │
 │   │   ├── model/                       # Camada de dados e regras
 │   │   │   ├── GameConfig.java          # Constantes, modos, Builder
 │   │   │   ├── Board.java               # Tabuleiro 3x3, undo/redo, historico
@@ -31,111 +32,66 @@ JogoDaVelha/
 │   │   │   ├── MoveRecord.java          # Registro de jogada (serializavel)
 │   │   │   ├── GameState.java           # Estado completo para save/load
 │   │   │   └── Scoreboard.java          # Placar, estatisticas, win rate
-│   │   │
-│   │   ├── controller/                  # Camada de controle
+│   │   ├── controller/
 │   │   │   ├── GameEventListener.java   # Interface Observer (12 eventos)
 │   │   │   └── GameController.java      # Orquestracao do jogo
-│   │   │
-│   │   ├── persistence/                 # Camada de persistencia
+│   │   ├── persistence/
 │   │   │   ├── ScoreRepository.java             # Interface
 │   │   │   ├── GameStateRepository.java         # Interface
 │   │   │   ├── FileScoreRepository.java         # Implementacao em arquivo
 │   │   │   └── FileGameStateRepository.java     # Save/load de partida
-│   │   │
-│   │   └── view/                        # Camada de apresentacao
+│   │   └── view/
 │   │       ├── Theme.java                       # 4 temas visuais
 │   │       ├── swing/
 │   │       │   ├── SwingMainMenuView.java       # Menu principal (GUI)
 │   │       │   └── SwingGameView.java           # Tabuleiro + controles (GUI)
 │   │       └── console/
 │   │           └── ConsoleGameAdapter.java      # Adaptador para terminal
-│   │
 │   └── test/java/model/
 │       ├── BoardTest.java                        # 12 testes
 │       ├── GameRulesTest.java                    # 10 testes
 │       └── AIPlayerTest.java                     # 8 testes
-│
 ├── out/                           # Classes compiladas (.class)
 └── dist/                          # Distribuicao
 ```
 
-## Como Compilar
+### Como Compilar
 
 ```bash
 javac -sourcepath src/main/java -d out src/main/java/Main.java
-```
-
-Para gerar o JAR:
-
-```bash
 jar cfe out/JogoDaVelha.jar Main -C out .
 ```
 
-## Como Executar
+### Como Executar
 
-### Interface Grafica (padrao)
+| Modo | Comando |
+|---|---|
+| GUI | `java -cp out Main` ou `./JogoDaVelha.sh` |
+| Console | `java -cp out Main --console` |
 
-```bash
-java -cp out Main
-```
+Console: `u` (undo), `r` (redo), `s` (save), ou 1-9 para jogar.
 
-Ou com o executavel:
-
-```bash
-./JogoDaVelha.sh
-```
-
-### Modo Console
-
-```bash
-java -cp out Main --console
-```
-
-Comandos no modo console: `u` (undo), `r` (redo), `s` (save), ou numero 1-9 para jogar.
-
-## Como Rodar os Testes
-
-Com JUnit 4 no classpath:
+### Testes
 
 ```bash
 java -cp out:junit-4.13.jar:hamcrest-core-1.3.jar org.junit.runner.JUnitCore \
     model.BoardTest model.GameRulesTest model.AIPlayerTest
 ```
 
-## Arquitetura
+### Arquitetura
 
-O projeto segue o padrao **MVC (Model-View-Controller)** com **Observer** para desacoplar a interface da logica.
+Padrao **MVC + Observer**:
 
 ```
-┌─────────────┐     eventos      ┌──────────────────┐
-│    View      │ ◄──────────────  │   Controller      │
-│  (Swing/     │                  │ GameController    │
-│   Console)   │ ── acoes ──────► │                   │
-└─────────────┘                   └───────┬───────────┘
-                                          │
-                                          ▼
-                                  ┌───────────────┐
-                                  │    Model       │
-                                  │ Board, Rules,  │
-                                  │ AI, Scoreboard │
-                                  └───────┬───────┘
-                                          │
-                                          ▼
-                                  ┌───────────────┐
-                                  │  Persistence   │
-                                  │ Repositories   │
-                                  └───────────────┘
+View (Swing/Console) ── acoes ──► Controller ──► Model (Board, Rules, AI)
+       ▲                            │                   │
+       └──────── eventos ──────────┘                   ▼
+                                              Persistence (Repositories)
 ```
 
-### Fluxo de um movimento
+**Fluxo:** Usuario clica → `controller.makeMove(pos)` → marca no `Board` → verifica `GameRules` → dispara `onBoardUpdated()` → View atualiza.
 
-1. Usuario clica num botao (View)
-2. `SwingGameView` chama `controller.makeMove(pos)` (Controller)
-3. `GameController` valida, marca no `Board`, verifica `GameRules` (Model)
-4. `GameController` dispara evento `onBoardUpdated()` via `GameEventListener` (Observer)
-5. `SwingGameView` atualiza os botoes na tela (View)
-
-### GameEventListener (Interface Observer)
+### GameEventListener (12 eventos)
 
 | Evento | Descricao |
 |---|---|
@@ -152,42 +108,14 @@ O projeto segue o padrao **MVC (Model-View-Controller)** com **Observer** para d
 | `onGameSaved()` | Partida salva |
 | `onGameLoaded(state)` | Partida carregada |
 
-## Features
-
 ### Modos de Jogo
 
 | Modo | Descricao |
 |---|---|
 | **PvP** | Jogador vs Jogador (local) |
-| **IA Facil** | Jogadas aleatorias + bloqueio basico |
+| **IA Facil** | Aleatorio + bloqueio basico |
 | **IA Media** | Heuristicas (centro, cantos) + 60% minimax |
-| **IA Dificil** | Alpha-beta pruning completo (invencivel) |
-
-### IA - Niveis de Dificuldade
-
-- **Facil**: escolhe jogada aleatoria, mas bloqueia vitoria imediata do oponente
-- **Medio**: prioriza vitoria > bloqueio > centro > cantos; 60% das vezes usa minimax
-- **Dificil**: algoritmo **Minimax com Alpha-Beta Pruning** — avalia toda a arvore de decisoes e nunca perde
-
-### Sistema de Undo/Redo
-
-- `Board` mantem pilha de `MoveRecord` para undo e redo
-- No modo IA, undo/redo desfaz/refaz tanto a jogada da IA quanto a do jogador
-- Disponivel via botoes na GUI ou comandos `u`/`r` no console
-
-### Save/Load de Partida
-
-- Salva estado completo: tabuleiro, historico de jogadas, modo, jogadores, timer
-- Formato texto simples com campos chave=valor
-- Opcao "Continuar Partida" no menu principal quando ha jogo salvo
-- Implementado via `FileGameStateRepository` (interface `GameStateRepository`)
-
-### Placar e Ranking
-
-- Conta vitorias de X, vitorias de O e empates
-- Calcula taxa de vitoria (win rate %)
-- Persistente entre sessoes via `FileScoreRepository`
-- Opcao de resetar no dialog de ranking
+| **IA Dificil** | Alpha-beta pruning (invencivel) |
 
 ### Temas Visuais
 
@@ -198,92 +126,41 @@ O projeto segue o padrao **MVC (Model-View-Controller)** com **Observer** para d
 | **Neon** | Fundo preto, X ciano, O rosa |
 | **Retro** | Fundo verde, X amarelo, O laranja |
 
-### Timer por Jogada
+### Features
 
-- Opcional ao iniciar partida (15 segundos)
-- Desabilitado durante turno da IA
-- Se o tempo esgotar, o jogador perde (forfeit automatico)
+- **Undo/Redo** — pilha de jogadas, disponivel na GUI e console
+- **Save/Load** — salva estado completo do tabuleiro e historico
+- **Placar persistente** — vitorias, empates, win rate %, entre sessoes
+- **Timer por jogada** — 15s opcional, forfeit automatico ao expirar
+- **Historico visual** — painel lateral lista todas as jogadas em tempo real
+- **Highlight de vitoria** — 3 celulas vencedoras destacadas em verde
 
-### Historico de Jogadas
+### Classes Principais
 
-- Painel lateral na GUI lista todas as jogadas em ordem
-- Atualiza em tempo real com cada movimento
-- Cada entrada mostra: numero da jogada, simbolo, posicao
+| Classe | Responsabilidade |
+|---|---|
+| `model/Board` | Matriz 3x3, undo/redo, historico de jogadas |
+| `model/GameRules` | Verificacao de vitoria (8 combos) e empate |
+| `model/AIPlayer` | IA com 3 niveis (aleatorio / heuristico / alpha-beta) |
+| `controller/GameController` | Orquestra fluxo do jogo, timer, IA |
+| `persistence/*` | Interfaces + implementacoes File para save e placar |
 
-### Highlight de Vitoria
-
-- Ao vencer, as 3 celulas da linha vencedora sao destacadas em verde
-- Funciona para todas as 8 combinacoes (3 linhas + 3 colunas + 2 diagonais)
-
-## Classes Principais
-
-### model/Board
-
-Gerencia a matriz 3x3 com pilhas de undo/redo. Metodos principais:
-
-- `markPosition(pos, symbol)` — marca uma celula e registra no historico
-- `undoLastMove()` — desfaz a ultima jogada (push para redo stack)
-- `redoLastMove()` — refaz a ultima jogada desfeita
-- `restoreFrom(cells, history, moveCount)` — restaura estado salvo
-
-### model/GameRules
-
-Logica pura de verificacao, sem estado. Retorna `int[]` com as posicoes vencedoras ou `null`.
-
-- `checkVictory(board, symbol)` — verifica as 8 combinacoes possiveis
-- `checkDraw(board)` — verifica se o tabuleiro esta cheio sem vencedor
-
-### model/AIPlayer
-
-Metodo `chooseMove(board)` com estrategia variavel por dificuldade:
-
-- **Facil**: `findWinningMove()` + `randomMove()`
-- **Medio**: vitoria > bloqueio > centro > cantos > 60% minimax
-- **Dificil**: `alphabeta()` com cortes alfa-beta, profundidade ilimitada
-
-### controller/GameController
-
-Orquestra todo o fluxo do jogo. Recebe `GameEventListener` e `GameStateRepository` por injecao de dependencia.
-
-- `makeMove(pos)` — valida, marca, verifica vitoria/empate, alterna jogador
-- `undoMove()` / `redoMove()` — delega ao Board com troca de jogador
-- `saveGame()` — cria `GameState` e salva via repositorio
-- `resumeGame(state)` — restaura partida salva
-- `forfeit()` — jogador atual desiste
-
-### persistence/
-
-Interfaces `ScoreRepository` e `GameStateRepository` desacoplam a logica de persistencia. Implementacoes em arquivo texto com formato `chave=valor`.
-
-## Execucao Rapida
-
-```bash
-# Compilar
-javac -sourcepath src/main/java -d out src/main/java/Main.java
-
-# Rodar GUI
-java -cp out Main
-
-# Rodar Console
-java -cp out Main --console
-
-# Executavel (duplo click)
-./JogoDaVelha.sh
-```
-
-</details>
+**[Voltar ao topo](#jogo-da-velha--tic-tac-toe--ta-te-ti)**
 
 ---
+---
 
-<details>
-<summary>🌐 English</summary>
+<a id="english"></a>
+## 🇺🇸 English
 
-## Requirements
+Tic-Tac-Toe implemented in Java with Swing GUI, MVC architecture, AI with alpha-beta pruning, theme system, save/load, undo/redo and persistent scoreboard.
+
+### Requirements
 
 - **Java 21+** (compiled with OpenJDK 25)
 - **JUnit 4** (to run tests)
 
-## Project Structure
+### Project Structure
 
 ```
 JogoDaVelha/
@@ -292,7 +169,6 @@ JogoDaVelha/
 ├── src/
 │   ├── main/java/
 │   │   ├── Main.java                    # Entry point
-│   │   │
 │   │   ├── model/                       # Data and rules layer
 │   │   │   ├── GameConfig.java          # Constants, modes, Builder
 │   │   │   ├── Board.java               # 3x3 board, undo/redo, history
@@ -302,111 +178,66 @@ JogoDaVelha/
 │   │   │   ├── MoveRecord.java          # Move record (serializable)
 │   │   │   ├── GameState.java           # Full state for save/load
 │   │   │   └── Scoreboard.java          # Scoreboard, stats, win rate
-│   │   │
-│   │   ├── controller/                  # Control layer
+│   │   ├── controller/
 │   │   │   ├── GameEventListener.java   # Observer interface (12 events)
 │   │   │   └── GameController.java      # Game orchestration
-│   │   │
-│   │   ├── persistence/                 # Persistence layer
+│   │   ├── persistence/
 │   │   │   ├── ScoreRepository.java             # Interface
 │   │   │   ├── GameStateRepository.java         # Interface
 │   │   │   ├── FileScoreRepository.java         # File implementation
 │   │   │   └── FileGameStateRepository.java     # Save/load game
-│   │   │
-│   │   └── view/                        # Presentation layer
+│   │   └── view/
 │   │       ├── Theme.java                       # 4 visual themes
 │   │       ├── swing/
 │   │       │   ├── SwingMainMenuView.java       # Main menu (GUI)
 │   │       │   └── SwingGameView.java           # Board + controls (GUI)
 │   │       └── console/
 │   │           └── ConsoleGameAdapter.java      # Terminal adapter
-│   │
 │   └── test/java/model/
 │       ├── BoardTest.java                        # 12 tests
 │       ├── GameRulesTest.java                    # 10 tests
 │       └── AIPlayerTest.java                     # 8 tests
-│
 ├── out/                           # Compiled classes (.class)
 └── dist/                          # Distribution
 ```
 
-## How to Compile
+### How to Compile
 
 ```bash
 javac -sourcepath src/main/java -d out src/main/java/Main.java
-```
-
-To generate the JAR:
-
-```bash
 jar cfe out/JogoDaVelha.jar Main -C out .
 ```
 
-## How to Run
+### How to Run
 
-### Graphical Interface (default)
+| Mode | Command |
+|---|---|
+| GUI | `java -cp out Main` or `./JogoDaVelha.sh` |
+| Console | `java -cp out Main --console` |
 
-```bash
-java -cp out Main
-```
+Console: `u` (undo), `r` (redo), `s` (save), or 1-9 to play.
 
-Or with the executable:
-
-```bash
-./JogoDaVelha.sh
-```
-
-### Console Mode
-
-```bash
-java -cp out Main --console
-```
-
-Console commands: `u` (undo), `r` (redo), `s` (save), or number 1-9 to play.
-
-## How to Run Tests
-
-With JUnit 4 on the classpath:
+### Tests
 
 ```bash
 java -cp out:junit-4.13.jar:hamcrest-core-1.3.jar org.junit.runner.JUnitCore \
     model.BoardTest model.GameRulesTest model.AIPlayerTest
 ```
 
-## Architecture
+### Architecture
 
-The project follows the **MVC (Model-View-Controller)** pattern with **Observer** to decouple the interface from the logic.
+**MVC + Observer** pattern:
 
 ```
-┌─────────────┐     events       ┌──────────────────┐
-│    View      │ ◄──────────────  │   Controller      │
-│  (Swing/     │                  │ GameController    │
-│   Console)   │ ── actions ────► │                   │
-└─────────────┘                   └───────┬───────────┘
-                                          │
-                                          ▼
-                                  ┌───────────────┐
-                                  │    Model       │
-                                  │ Board, Rules,  │
-                                  │ AI, Scoreboard │
-                                  └───────┬───────┘
-                                          │
-                                          ▼
-                                  ┌───────────────┐
-                                  │  Persistence   │
-                                  │ Repositories   │
-                                  └───────────────┘
+View (Swing/Console) ── actions ──► Controller ──► Model (Board, Rules, AI)
+       ▲                            │                   │
+       └──────── events ───────────┘                   ▼
+                                              Persistence (Repositories)
 ```
 
-### Move Flow
+**Flow:** User clicks → `controller.makeMove(pos)` → marks on `Board` → checks `GameRules` → fires `onBoardUpdated()` → View updates.
 
-1. User clicks a button (View)
-2. `SwingGameView` calls `controller.makeMove(pos)` (Controller)
-3. `GameController` validates, marks on `Board`, checks `GameRules` (Model)
-4. `GameController` fires `onBoardUpdated()` event via `GameEventListener` (Observer)
-5. `SwingGameView` updates the buttons on screen (View)
-
-### GameEventListener (Observer Interface)
+### GameEventListener (12 events)
 
 | Event | Description |
 |---|---|
@@ -423,8 +254,6 @@ The project follows the **MVC (Model-View-Controller)** pattern with **Observer*
 | `onGameSaved()` | Game saved |
 | `onGameLoaded(state)` | Game loaded |
 
-## Features
-
 ### Game Modes
 
 | Mode | Description |
@@ -432,33 +261,7 @@ The project follows the **MVC (Model-View-Controller)** pattern with **Observer*
 | **PvP** | Player vs Player (local) |
 | **AI Easy** | Random moves + basic blocking |
 | **AI Medium** | Heuristics (center, corners) + 60% minimax |
-| **AI Hard** | Full alpha-beta pruning (unbeatable) |
-
-### AI - Difficulty Levels
-
-- **Easy**: picks random move, but blocks opponent's immediate win
-- **Medium**: prioritizes win > block > center > corners; uses minimax 60% of the time
-- **Hard**: **Minimax with Alpha-Beta Pruning** — evaluates the entire decision tree and never loses
-
-### Undo/Redo System
-
-- `Board` maintains a stack of `MoveRecord` for undo and redo
-- In AI mode, undo/redo reverses/replays both the AI's and the player's moves
-- Available via buttons in the GUI or `u`/`r` commands in console
-
-### Save/Load Game
-
-- Saves full state: board, move history, mode, players, timer
-- Simple text format with key=value fields
-- "Continue Game" option in the main menu when a saved game exists
-- Implemented via `FileGameStateRepository` (implements `GameStateRepository`)
-
-### Scoreboard and Ranking
-
-- Counts X wins, O wins, and draws
-- Calculates win rate (%)
-- Persists between sessions via `FileScoreRepository`
-- Option to reset in the ranking dialog
+| **AI Hard** | Alpha-beta pruning (unbeatable) |
 
 ### Visual Themes
 
@@ -469,92 +272,41 @@ The project follows the **MVC (Model-View-Controller)** pattern with **Observer*
 | **Neon** | Black background, cyan X, pink O |
 | **Retro** | Green background, yellow X, orange O |
 
-### Turn Timer
+### Features
 
-- Optional when starting a game (15 seconds)
-- Disabled during AI's turn
-- If time runs out, the player forfeits automatically
+- **Undo/Redo** — move stack, available in GUI and console
+- **Save/Load** — saves full board state and move history
+- **Persistent scoreboard** — wins, draws, win rate %, across sessions
+- **Turn timer** — optional 15s, auto-forfeit on timeout
+- **Move history** — side panel lists all moves in real time
+- **Win highlight** — 3 winning cells highlighted in green
 
-### Move History
+### Main Classes
 
-- Side panel in the GUI lists all moves in order
-- Updates in real time with each move
-- Each entry shows: move number, symbol, position
+| Class | Responsibility |
+|---|---|
+| `model/Board` | 3x3 matrix, undo/redo, move history |
+| `model/GameRules` | Win detection (8 combos) and draw check |
+| `model/AIPlayer` | AI with 3 levels (random / heuristic / alpha-beta) |
+| `controller/GameController` | Orchestrates game flow, timer, AI |
+| `persistence/*` | Interfaces + File implementations for save and scoreboard |
 
-### Win Highlight
-
-- On victory, the 3 winning cells are highlighted in green
-- Works for all 8 combinations (3 rows + 3 columns + 2 diagonals)
-
-## Main Classes
-
-### model/Board
-
-Manages the 3x3 matrix with undo/redo stacks. Key methods:
-
-- `markPosition(pos, symbol)` — marks a cell and records in history
-- `undoLastMove()` — undoes the last move (pushes to redo stack)
-- `redoLastMove()` — redoes the last undone move
-- `restoreFrom(cells, history, moveCount)` — restores saved state
-
-### model/GameRules
-
-Pure verification logic, stateless. Returns `int[]` with winning positions or `null`.
-
-- `checkVictory(board, symbol)` — checks all 8 possible combinations
-- `checkDraw(board)` — checks if the board is full with no winner
-
-### model/AIPlayer
-
-`chooseMove(board)` method with variable strategy by difficulty:
-
-- **Easy**: `findWinningMove()` + `randomMove()`
-- **Medium**: win > block > center > corners > 60% minimax
-- **Hard**: `alphabeta()` with alpha-beta cuts, unlimited depth
-
-### controller/GameController
-
-Orchestrates the entire game flow. Receives `GameEventListener` and `GameStateRepository` via dependency injection.
-
-- `makeMove(pos)` — validates, marks, checks win/draw, switches player
-- `undoMove()` / `redoMove()` — delegates to Board with player switch
-- `saveGame()` — creates `GameState` and saves via repository
-- `resumeGame(state)` — restores saved game
-- `forfeit()` — current player gives up
-
-### persistence/
-
-`ScoreRepository` and `GameStateRepository` interfaces decouple persistence logic. File implementations use `key=value` text format.
-
-## Quick Start
-
-```bash
-# Compile
-javac -sourcepath src/main/java -d out src/main/java/Main.java
-
-# Run GUI
-java -cp out Main
-
-# Run Console
-java -cp out Main --console
-
-# Executable (double-click)
-./JogoDaVelha.sh
-```
-
-</details>
+**[Back to top](#jogo-da-velha--tic-tac-toe--ta-te-ti)**
 
 ---
+---
 
-<details>
-<summary>🌐 Español</summary>
+<a id="espanol"></a>
+## 🇪🇸 Espanol
 
-## Requisitos
+Ta-Te-Ti (Tic-Tac-Toe) implementado en Java con interfaz grafica Swing, arquitectura MVC, IA con poda alfa-beta, sistema de temas, guardado/carga, deshacer/rehacer y marcador persistente.
+
+### Requisitos
 
 - **Java 21+** (compilado con OpenJDK 25)
 - **JUnit 4** (para ejecutar las pruebas)
 
-## Estructura del Proyecto
+### Estructura del Proyecto
 
 ```
 JogoDaVelha/
@@ -563,7 +315,6 @@ JogoDaVelha/
 ├── src/
 │   ├── main/java/
 │   │   ├── Main.java                    # Punto de entrada
-│   │   │
 │   │   ├── model/                       # Capa de datos y reglas
 │   │   │   ├── GameConfig.java          # Constantes, modos, Builder
 │   │   │   ├── Board.java               # Tablero 3x3, deshacer/rehacer, historial
@@ -573,111 +324,66 @@ JogoDaVelha/
 │   │   │   ├── MoveRecord.java          # Registro de jugada (serializable)
 │   │   │   ├── GameState.java           # Estado completo para guardar/cargar
 │   │   │   └── Scoreboard.java          # Marcador, estadisticas, win rate
-│   │   │
-│   │   ├── controller/                  # Capa de control
+│   │   ├── controller/
 │   │   │   ├── GameEventListener.java   # Interfaz Observer (12 eventos)
 │   │   │   └── GameController.java      # Orquestacion del juego
-│   │   │
-│   │   ├── persistence/                 # Capa de persistencia
+│   │   ├── persistence/
 │   │   │   ├── ScoreRepository.java             # Interfaz
 │   │   │   ├── GameStateRepository.java         # Interfaz
 │   │   │   ├── FileScoreRepository.java         # Implementacion en archivo
 │   │   │   └── FileGameStateRepository.java     # Guardar/cargar partida
-│   │   │
-│   │   └── view/                        # Capa de presentacion
+│   │   └── view/
 │   │       ├── Theme.java                       # 4 temas visuales
 │   │       ├── swing/
 │   │       │   ├── SwingMainMenuView.java       # Menu principal (GUI)
 │   │       │   └── SwingGameView.java           # Tablero + controles (GUI)
 │   │       └── console/
 │   │           └── ConsoleGameAdapter.java      # Adaptador para terminal
-│   │
 │   └── test/java/model/
 │       ├── BoardTest.java                        # 12 pruebas
 │       ├── GameRulesTest.java                    # 10 pruebas
 │       └── AIPlayerTest.java                     # 8 pruebas
-│
 ├── out/                           # Clases compiladas (.class)
 └── dist/                          # Distribucion
 ```
 
-## Como Compilar
+### Como Compilar
 
 ```bash
 javac -sourcepath src/main/java -d out src/main/java/Main.java
-```
-
-Para generar el JAR:
-
-```bash
 jar cfe out/JogoDaVelha.jar Main -C out .
 ```
 
-## Como Ejecutar
+### Como Ejecutar
 
-### Interfaz Grafica (predeterminada)
+| Modo | Comando |
+|---|---|
+| GUI | `java -cp out Main` o `./JogoDaVelha.sh` |
+| Consola | `java -cp out Main --console` |
 
-```bash
-java -cp out Main
-```
+Consola: `u` (deshacer), `r` (rehacer), `s` (guardar), o 1-9 para jugar.
 
-O con el ejecutable:
-
-```bash
-./JogoDaVelha.sh
-```
-
-### Modo Consola
-
-```bash
-java -cp out Main --console
-```
-
-Comandos en modo consola: `u` (deshacer), `r` (rehacer), `s` (guardar), o numero 1-9 para jugar.
-
-## Como Ejecutar las Pruebas
-
-Con JUnit 4 en el classpath:
+### Pruebas
 
 ```bash
 java -cp out:junit-4.13.jar:hamcrest-core-1.3.jar org.junit.runner.JUnitCore \
     model.BoardTest model.GameRulesTest model.AIPlayerTest
 ```
 
-## Arquitectura
+### Arquitectura
 
-El proyecto sigue el patron **MVC (Modelo-Vista-Controlador)** con **Observer** para desacoplar la interfaz de la logica.
+Patron **MVC + Observer**:
 
 ```
-┌─────────────┐     eventos      ┌──────────────────┐
-│    Vista     │ ◄──────────────  │   Controlador     │
-│  (Swing/     │                  │ GameController    │
-│   Consola)   │ ── acciones ───► │                   │
-└─────────────┘                   └───────┬───────────┘
-                                          │
-                                          ▼
-                                  ┌───────────────┐
-                                  │    Modelo      │
-                                  │ Board, Rules,  │
-                                  │ AI, Scoreboard │
-                                  └───────┬───────┘
-                                          │
-                                          ▼
-                                  ┌───────────────┐
-                                  │  Persistencia  │
-                                  │  Repositorios  │
-                                  └───────────────┘
+Vista (Swing/Consola) ── acciones ──► Controlador ──► Modelo (Board, Rules, AI)
+       ▲                                │                   │
+       └────────── eventos ────────────┘                   ▼
+                                                Persistencia (Repositorios)
 ```
 
-### Flujo de un movimiento
+**Flujo:** Usuario hace clic → `controller.makeMove(pos)` → marca en `Board` → verifica `GameRules` → dispara `onBoardUpdated()` → Vista se actualiza.
 
-1. El usuario hace clic en un boton (Vista)
-2. `SwingGameView` llama a `controller.makeMove(pos)` (Controlador)
-3. `GameController` valida, marca en `Board`, verifica `GameRules` (Modelo)
-4. `GameController` dispara el evento `onBoardUpdated()` via `GameEventListener` (Observer)
-5. `SwingGameView` actualiza los botones en pantalla (Vista)
-
-### GameEventListener (Interfaz Observer)
+### GameEventListener (12 eventos)
 
 | Evento | Descripcion |
 |---|---|
@@ -694,42 +400,14 @@ El proyecto sigue el patron **MVC (Modelo-Vista-Controlador)** con **Observer** 
 | `onGameSaved()` | Partida guardada |
 | `onGameLoaded(state)` | Partida cargada |
 
-## Caracteristicas
-
 ### Modos de Juego
 
 | Modo | Descripcion |
 |---|---|
 | **PvP** | Jugador vs Jugador (local) |
-| **IA Facil** | Jugadas aleatorias + bloqueo basico |
+| **IA Facil** | Aleatorio + bloqueo basico |
 | **IA Media** | Heuristicas (centro, esquinas) + 60% minimax |
-| **IA Dificil** | Poda alfa-beta completa (invencible) |
-
-### IA - Niveles de Dificultad
-
-- **Facil**: elige jugada aleatoria, pero bloquea la victoria inmediata del oponente
-- **Medio**: prioriza victoria > bloqueo > centro > esquinas; usa minimax el 60% de las veces
-- **Dificil**: algoritmo **Minimax con Poda Alfa-Beta** — evalua todo el arbol de decisiones y nunca pierde
-
-### Sistema de Deshacer/Rehacer
-
-- `Board` mantiene una pila de `MoveRecord` para deshacer y rehacer
-- En modo IA, deshacer/rehacer revierte/repite tanto la jugada de la IA como la del jugador
-- Disponible mediante botones en la GUI o comandos `u`/`r` en consola
-
-### Guardar/Cargar Partida
-
-- Guarda estado completo: tabuleiro, historial de jugadas, modo, jugadores, timer
-- Formato de texto simple con campos clave=valor
-- Opcion "Continuar Partida" en el menu principal cuando hay juego guardado
-- Implementado via `FileGameStateRepository` (interfaz `GameStateRepository`)
-
-### Marcador y Ranking
-
-- Cuenta victorias de X, victorias de O y empates
-- Calcula tasa de victoria (win rate %)
-- Persistente entre sesiones via `FileScoreRepository`
-- Opcion de reiniciar en el dialogo de ranking
+| **IA Dificil** | Poda alfa-beta (invencible) |
 
 ### Temas Visuales
 
@@ -740,77 +418,23 @@ El proyecto sigue el patron **MVC (Modelo-Vista-Controlador)** con **Observer** 
 | **Neon** | Fondo negro, X cian, O rosa |
 | **Retro** | Fondo verde, X amarillo, O naranja |
 
-### Timer por Jugada
+### Caracteristicas
 
-- Opcional al iniciar partida (15 segundos)
-- Deshabilitado durante el turno de la IA
-- Si se acaba el tiempo, el jugador pierde automaticamente
+- **Deshacer/Rehacer** — pila de jugadas, disponible en GUI y consola
+- **Guardar/Cargar** — guarda estado completo del tablero e historial
+- **Marcador persistente** — victorias, empates, win rate %, entre sesiones
+- **Timer por jugada** — 15s opcional, derrota automatica al expirar
+- **Historial visual** — panel lateral lista todas las jugadas en tiempo real
+- **Resaltado de victoria** — 3 celdas ganadoras resaltadas en verde
 
-### Historial de Jugadas
+### Clases Principales
 
-- Panel lateral en la GUI lista todas las jugadas en orden
-- Se actualiza en tiempo real con cada movimiento
-- Cada entrada muestra: numero de jugada, simbolo, posicion
+| Clase | Responsabilidad |
+|---|---|
+| `model/Board` | Matriz 3x3, deshacer/rehacer, historial de jugadas |
+| `model/GameRules` | Deteccion de victoria (8 combos) y empate |
+| `model/AIPlayer` | IA con 3 niveles (aleatorio / heuristico / alfa-beta) |
+| `controller/GameController` | Orquesta flujo del juego, timer, IA |
+| `persistence/*` | Interfaces + implementaciones File para guardado y marcador |
 
-### Resaltado de Victoria
-
-- Al ganar, las 3 celdas de la linea ganadora se resaltan en verde
-- Funciona para las 8 combinaciones (3 filas + 3 columnas + 2 diagonales)
-
-## Clases Principales
-
-### model/Board
-
-Gestiona la matriz 3x3 con pilas de deshacer/rehacer. Metodos principales:
-
-- `markPosition(pos, symbol)` — marca una celda y registra en el historial
-- `undoLastMove()` — deshace la ultima jugada (push a la pila de rehacer)
-- `redoLastMove()` — rehace la ultima jugada deshecha
-- `restoreFrom(cells, history, moveCount)` — restaura estado guardado
-
-### model/GameRules
-
-Logica pura de verificacion, sin estado. Retorna `int[]` con las posiciones ganadoras o `null`.
-
-- `checkVictory(board, symbol)` — verifica las 8 combinaciones posibles
-- `checkDraw(board)` — verifica si el tablero esta lleno sin ganador
-
-### model/AIPlayer
-
-Metodo `chooseMove(board)` con estrategia variable segun dificultad:
-
-- **Facil**: `findWinningMove()` + `randomMove()`
-- **Medio**: victoria > bloqueo > centro > esquinas > 60% minimax
-- **Dificil**: `alphabeta()` con cortes alfa-beta, profundidad ilimitada
-
-### controller/GameController
-
-Orquesta todo el flujo del juego. Recibe `GameEventListener` y `GameStateRepository` por inyeccion de dependencia.
-
-- `makeMove(pos)` — valida, marca, verifica victoria/empate, alterna jugador
-- `undoMove()` / `redoMove()` — delega al Board con cambio de jugador
-- `saveGame()` — crea `GameState` y guarda via repositorio
-- `resumeGame(state)` — restaura partida guardada
-- `forfeit()` — el jugador actual se rinde
-
-### persistence/
-
-Las interfaces `ScoreRepository` y `GameStateRepository` desacoplan la logica de persistencia. Las implementaciones en archivo usan formato de texto `clave=valor`.
-
-## Inicio Rapido
-
-```bash
-# Compilar
-javac -sourcepath src/main/java -d out src/main/java/Main.java
-
-# Ejecutar GUI
-java -cp out Main
-
-# Ejecutar Consola
-java -cp out Main --console
-
-# Ejecutable (doble click)
-./JogoDaVelha.sh
-```
-
-</details>
+**[Volver arriba](#jogo-da-velha--tic-tac-toe--ta-te-ti)**
